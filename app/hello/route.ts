@@ -2,8 +2,8 @@
 export const runtime = 'nodejs';
 
 // Dependencies
-import { packJSON } from "@/lib/utils";
+import { data } from "@/lib/utils";
 
-export function GET(request: Request) {
-    return packJSON("Hello there!");
+export function GET(_r: Request) {
+    return data(null, 200, "Hi there!");
 }
