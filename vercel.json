@@ -2,7 +2,18 @@
   "rewrites": [
     {
       "source": "/docs/(.*)",
-      "destination": "/api/proxy?path=$1"
+      "destination": "https://5431223.n1.apifox.cn/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/docs/(.*)",
+      "headers": [
+        {
+          "key": "X-Apifox-Docs-Site-ID",
+          "value": "5431223"
+        }
+      ]
     }
   ]
 }
