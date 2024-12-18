@@ -1,14 +1,19 @@
 {
   "headers": [
     {
-      "source": "/docs/(.*)",
-      "destination": "https://5431223.n1.apifox.cn/docs/:1",
+      "source": "/docs(.*)",
       "headers": [
         {
           "key": "X-Apifox-Docs-Site-ID",
           "value": "5431223"
         }
       ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/docs(.*)",
+      "destination": "https://5431223.n1.apifox.cn/docs$1"
     }
   ]
 }
