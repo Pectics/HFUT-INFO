@@ -1,8 +1,11 @@
 {
-  "rewrites": [
+  "routes": [
     {
-      "source": "/docs/(.*)",
-      "destination": "https://5431223.n1.apifox.cn/$1"
+      "src": "/docs/(.*)",
+      "dest": "https://5431223.n1.apifox.cn/$1",
+      "headers": {
+        "X-Apifox-Docs-Site-ID": "5431223"
+      }
     }
   ]
 }
