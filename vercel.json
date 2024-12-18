@@ -1,8 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/docs(.*)",
-      "destination": "https://in5x8qplsj.apifox.cn$1"
+      "source": "/docs/(.*)",
+      "destination": "https://5431223.n1.apifox.cn/$1"
     }
   ]
 }
