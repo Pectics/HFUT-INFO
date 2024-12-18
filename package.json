@@ -1,0 +1,29 @@
+{
+  "name": "hfut-info-api",
+  "version": "0.1.0",
+  "description": "合肥工业大学相关信息接口",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Pectics/HFUT-Info-API.git"
+  },
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@vercel/functions": "^1.5.2",
+    "cheerio": "^1.0.0",
+    "next": "15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5"
+  }
+}
