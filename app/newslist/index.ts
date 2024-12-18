@@ -45,7 +45,7 @@ function parseNews($: CheerioAPI) {
     for (let i = 1; i <= count; i++) {
         let group = news_href.exec($(selectors.item(i)).attr('href')!)!;
         news.push({
-            id: group[2],
+            id: parseInt(group[2]),
             title: $(selectors.title(i)).text().trim(),
             summary: $(selectors.summary(i)).text().trim(),
             date: `${$(selectors.month(i)).text().trim()}-${$(selectors.day(i)).text().trim()}`,
