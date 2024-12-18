@@ -123,7 +123,7 @@ export async function news(id: number, format: 'array' | 'markdown' = 'array') {
     // Format content
     switch (format) {
         case 'markdown':
-            let markdown = `# ${title}\n\n`;
+            let markdown = '';
             for (const block of content)
                 switch (block.type) {
                     case 'image':
