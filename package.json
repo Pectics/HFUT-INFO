@@ -14,13 +14,15 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@vercel/functions": "^1.5.2",
     "cheerio": "^1.0.0",
+    "luxon": "^3.5.0",
     "next": "15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@vercel/functions": "^1.5.2",
+    "@types/luxon": "^3.4.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

@@ -1,10 +1,11 @@
 import { ParamError } from "./errors";
+import { DateTime } from "luxon";
 
 function paramString(
     req: Request,
     key: string,
-    def?: string | null,
-    range?: string[] | null
+    def?: string,
+    range?: string[]
 ): string {
     const value = new URL(req.url).searchParams.get(key);
     if (!value || range && !range.includes(value)) {
@@ -17,10 +18,10 @@ function paramString(
 function paramInt(
     req: Request,
     key: string,
-    def?: number | null,
-    range?: [number | null, number | null] | null
+    def?: number,
+    range?: [number | null, number | null]
 ): number {
-    const value = paramString(req, key, null, null);
+    const value = paramString(req, key);
     const num = parseInt(value);
     if (isNaN(num) || (range && (range[0] && num < range[0] || range[1] && num > range[1]))) {
         if (def) return def;
@@ -32,12 +33,12 @@ function paramInt(
 function paramFloat(
     req: Request,
     key: string,
-    def?: number | null,
-    range?: [number, number] | null
+    def?: number,
+    range?: [number | null, number | null]
 ): number {
-    const value = paramString(req, key, null, null);
+    const value = paramString(req, key);
     const num = parseFloat(value);
-    if (isNaN(num) || (range && (num < range[0] || num > range[1]))) {
+    if (isNaN(num) || (range && (range[0] && num < range[0] || range[1] && num > range[1]))) {
         if (def) return def;
         throw new ParamError(key, value);
     }
@@ -49,7 +50,7 @@ function data(data: any, code: number = 200, message?: string): Response {
         throw new Error(`Invalid status code: ${code}`);
     return new Response(JSON.stringify({
         code,
-        timestamp: Date.now(),
+        timestamp: DateTime.utc({ locale: 'zh-CN' }),
         message: message || 'OK',
         data,
     }, null, 4), {
@@ -61,7 +62,7 @@ function data(data: any, code: number = 200, message?: string): Response {
 function error(err: Error, code: number = 500): Response {
     return new Response(JSON.stringify({
         code,
-        timestamp: Date.now(),
+        timestamp: DateTime.utc({ locale: 'zh-CN' }),
         error: err.message,
     }, null, 4), {
         status: code,
