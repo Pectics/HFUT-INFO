@@ -2,7 +2,14 @@
   "rewrites": [
     {
       "source": "/docs/(.*)",
-      "destination": "https://5431223.n1.apifox.cn/$1"
+      "destination": "https://5431223.n1.apifox.cn/$1",
+      "has": [
+        {
+          "type": "header",
+          "key": "X-Apifox-Docs-Site-ID",
+          "value": "5431223"
+        }
+      ]
     }
   ],
   "headers": [
