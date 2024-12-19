@@ -2,6 +2,7 @@
 import { InvalidContentError } from '@/lib/errors';
 import { load as htmlLoad } from 'cheerio';
 import { createHash } from 'crypto';
+import { link } from 'fs';
 
 // Configs
 const hosts = {
@@ -61,7 +62,9 @@ const image_alt_style_regex = /.*text-align: *center;?/;
  * - text: The text content (only for type 'text').
  */
 export async function news(id: number, format: 'array' | 'markdown' = 'array') {
-    const $ = htmlLoad(await (await fetch(hosts.info(id), { headers, method: 'GET' })).text());
+    const _res = await fetch(hosts.info(id), { headers, method: 'GET' });
+    if (_res.status === 404) throw new Error('Resource Not Found');
+    const $ = htmlLoad(await _res.text());
     const title = $(selectors.title).text().trim();
 
     const date_str = $(selectors.date).text().trim();
@@ -162,7 +165,7 @@ export async function news(id: number, format: 'array' | 'markdown' = 'array') {
     }
 
     return {
-        id, title, date, source, editor, authors, content,
+        id, title, date, source, editor, authors, content, link: hosts.info(id),
         hash: createHash('md5').update(`?id=${id}&title=${title}`).digest('hex'),
     };
 }
