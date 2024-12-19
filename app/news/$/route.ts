@@ -6,9 +6,11 @@ export const runtime = 'nodejs';
 import { paramInt, paramString, data, error } from '@/lib/utils';
 import { ParamError } from '@/lib/errors';
 import { news } from '.';
+import { NextRequest } from 'next/server';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
 
+    console.log(request.nextUrl.searchParams.get('id'));
     // Parse and check parameters
     try {
         const _id = paramInt(request, 'id');
