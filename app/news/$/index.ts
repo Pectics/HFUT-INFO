@@ -166,6 +166,11 @@ export async function news(id: number, format: 'array' | 'markdown' = 'array') {
 
     return {
         id, title, date, source, editor, authors, content, link: hosts.info(id),
-        hash: createHash('md5').update(`?id=${id}&title=${title}`).digest('hex'),
+        hash: createHash('md5').update((() => {
+            const params = new URLSearchParams();
+            params.append('id', id.toString());
+            params.append('title', title);
+            return `news?${params.toString()}`;
+        })()).digest('hex'),
     };
 }

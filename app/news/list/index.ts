@@ -55,7 +55,11 @@ function parseNews($: CheerioAPI) {
             summary: $(selectors.summary(i)).text().trim(),
             date: `${$(selectors.month(i)).text().trim()}-${$(selectors.day(i)).text().trim()}`,
             link: `${hosts.origin}/${exec[1]}`,
-            hash: createHash('md5').update(`?id=${exec[2]}`).digest('hex'),
+            hash: createHash('md5').update((() => {
+                const params = new URLSearchParams();
+                params.append('id', exec[2]);
+                return `news_summary?${params.toString()}`;
+            })()).digest('hex'),
         });
     }
     return news;
