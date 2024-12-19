@@ -21,11 +21,11 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@vercel/functions": "^1.5.2",
     "@types/luxon": "^3.4.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vercel/functions": "^1.5.2",
     "typescript": "^5"
   }
 }

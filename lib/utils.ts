@@ -1,15 +1,19 @@
 import { ParamError } from "./errors";
 import { DateTime } from "luxon";
 
+function param(req: Request, key: string) {
+    return new URL(req.url).searchParams.get(key);
+}
+
 function paramString(
     req: Request,
     key: string,
     def?: string,
     range?: string[]
 ): string {
-    const value = new URL(req.url).searchParams.get(key);
+    const value = param(req, key);
     if (!value || range && !range.includes(value)) {
-        if (def) return def;
+        if (def !== undefined) return def;
         throw new ParamError(key, value);
     }
     return value;
@@ -21,10 +25,10 @@ function paramInt(
     def?: number,
     range?: [number | null, number | null]
 ): number {
-    const value = paramString(req, key);
-    const num = parseInt(value);
+    const value = param(req, key);
+    const num = parseInt(value || '');
     if (isNaN(num) || (range && (range[0] && num < range[0] || range[1] && num > range[1]))) {
-        if (def) return def;
+        if (def !== undefined) return def;
         throw new ParamError(key, value);
     }
     return num;
@@ -36,10 +40,10 @@ function paramFloat(
     def?: number,
     range?: [number | null, number | null]
 ): number {
-    const value = paramString(req, key);
-    const num = parseFloat(value);
+    const value = param(req, key);
+    const num = parseFloat(value || '');
     if (isNaN(num) || (range && (range[0] && num < range[0] || range[1] && num > range[1]))) {
-        if (def) return def;
+        if (def !== undefined) return def;
         throw new ParamError(key, value);
     }
     return num;
@@ -50,20 +54,20 @@ function data(data: any, code: number = 200, message?: string): Response {
         throw new Error(`Invalid status code: ${code}`);
     return new Response(JSON.stringify({
         code,
-        timestamp: DateTime.utc({ locale: 'zh-CN' }),
+        timestamp: DateTime.now().setZone(process.env.TIMEZONE || 'Asia/Shanghai').toMillis(),
         message: message || 'OK',
-        data,
+        data: data || undefined,
     }, null, 4), {
         status: code,
         headers: { 'Content-Type': 'application/json' },
     });
 }
 
-function error(err: Error, code: number = 500): Response {
+function error(err?: Error, code: number = 500): Response {
     return new Response(JSON.stringify({
         code,
-        timestamp: DateTime.utc({ locale: 'zh-CN' }),
-        error: err.message,
+        timestamp: DateTime.now().setZone(process.env.TIMEZONE || 'Asia/Shanghai').toMillis(),
+        error: err?.message || 'Internal Server Error',
     }, null, 4), {
         status: code,
         headers: { 'Content-Type': 'application/json' },
