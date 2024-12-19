@@ -7,4 +7,5 @@ export default {
     },
     HEADER_PARAM_PREFIX: 'X-HFUT-',
     TIMEZONE: 'Asia/Shanghai',
+    DOCS_URL: 'https://docs.hfut.info',
 }

@@ -28,6 +28,9 @@ export const config = { matcher: '/(.*)' };
 export function middleware(request: NextRequest) {
 
     const path = request.nextUrl.pathname;
+    if (path.startsWith('/docs')) NextResponse.redirect(new URL(path,
+        CONFIG.DOCS_URL || process.env.DOCS_URL || 'https://docs.hfut.info'
+    ));
 
     // Find the matched base
     for (const [base, endpoints] of Object.entries(API)) {
