@@ -2,6 +2,9 @@ import CONFIG from '@/config';
 import { error } from '@/lib/utils';
 import { NextRequest, NextResponse } from 'next/server';
 
+import { injectSpeedInsights } from '@vercel/speed-insights';
+import { inject as injectAnalytics } from "@vercel/analytics"
+
 // API config validation
 const API: { [base: string]: string[] } = {};
 Object.entries(CONFIG.API).forEach(([base, endpoints]) => {
@@ -26,6 +29,10 @@ Object.entries(CONFIG.API).forEach(([base, endpoints]) => {
 export const config = { matcher: '/(.*)' };
 
 export function middleware(request: NextRequest) {
+
+    // Inject speed insights and analytics
+    injectSpeedInsights();
+    injectAnalytics();
 
     const path = request.nextUrl.pathname;
     if (path.startsWith('/docs')) NextResponse.redirect(new URL(path,
