@@ -109,7 +109,7 @@ export async function news(id: number, format: 'array' | 'markdown' = 'array') {
     let content: string | ({
         type: 'image';
         url: string;
-        alt: string | null;
+        alt: string | undefined;
     } | {
         type: 'text';
         text: string;
@@ -124,7 +124,7 @@ export async function news(id: number, format: 'array' | 'markdown' = 'array') {
                     if (!img_src) throw new InvalidContentError(_current.find('img').text());
                     return img_src;
                 })()}`,
-                alt: null as string | null,
+                alt: undefined as string | undefined,
             };
             const _next_style = _current.next().attr('style');
             if (_next_style && image_alt_style_regex.test(_next_style)) {
