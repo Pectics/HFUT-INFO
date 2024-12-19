@@ -1,8 +1,14 @@
-import { ParamError } from "./errors";
+import config from "@/config";
+import { APIError, ParamError } from "@/lib/errors";
 import { DateTime } from "luxon";
 
 function param(req: Request, key: string) {
-    return new URL(req.url).searchParams.get(key);
+    return new URL(req.url).searchParams.get(key) ||
+        req.headers.get(`${
+            config.HEADER_PARAM_PREFIX ||
+            process.env.HEADER_PARAM_PREFIX ||
+            'X-HFUT-'
+        }${key}`);
 }
 
 function paramString(
@@ -49,28 +55,36 @@ function paramFloat(
     return num;
 }
 
-function data(data: any, code: number = 200, message?: string): Response {
+function data(data: any, code: number = 200): Response {
     if (code < 200 || code >= 300)
         throw new Error(`Invalid status code: ${code}`);
-    return new Response(JSON.stringify({
-        code,
-        timestamp: DateTime.now().setZone(process.env.TIMEZONE || 'Asia/Shanghai').toMillis(),
-        message: message || 'OK',
-        data: data || undefined,
-    }, null, 4), {
+    return new Response(JSON.stringify(data, null, 4), {
         status: code,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            'Date': DateTime.local(
+                { zone: config.TIMEZONE || process.env.TIMEZONE || 'Asia/Shanghai' }
+            ).toHTTP(),
+        },
     });
 }
 
-function error(err?: Error, code: number = 500): Response {
+function error<T extends Error>(err?: T, code?: number): Response {
+    const api = err instanceof APIError;
     return new Response(JSON.stringify({
-        code,
-        timestamp: DateTime.now().setZone(process.env.TIMEZONE || 'Asia/Shanghai').toMillis(),
-        error: err?.message || 'Internal Server Error',
-    }, null, 4), {
-        status: code,
-        headers: { 'Content-Type': 'application/json' },
+        code: api ? err.code : code || 500,
+        timestamp: api ? err.timestamp : DateTime.local(
+            { zone: config.TIMEZONE || process.env.TIMEZONE || 'Asia/Shanghai' }
+        ).toMillis(),
+        message: err?.message || 'Internal Server Error',
+    }), {
+        status: api ? err.code : code || 500,
+        headers: {
+            'Content-Type': 'application/json',
+            'Date': DateTime.local(
+                { zone: config.TIMEZONE || process.env.TIMEZONE || 'Asia/Shanghai' }
+            ).toHTTP(),
+        },
     });
 }
 

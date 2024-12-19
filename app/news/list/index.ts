@@ -1,4 +1,5 @@
 // Dependencies
+import { InvalidContentError } from "@/lib/errors";
 import { CheerioAPI, load as htmlLoad } from "cheerio";
 import { createHash } from 'crypto';
 
@@ -43,14 +44,18 @@ function parseNews($: CheerioAPI) {
     const count = Math.min(ncount, $(selectors.list).children().length);
     const news = [];
     for (let i = 1; i <= count; i++) {
-        let group = news_href.exec($(selectors.item(i)).attr('href')!)!;
+        const item = $(selectors.item(i));
+        const href = item.attr('href');
+        if (!href) throw new InvalidContentError(`News item href not found: ${item.text()}`);
+        const exec = news_href.exec(href);
+        if (!exec) throw new InvalidContentError(`News item href invalid: ${href}`);
         news.push({
-            id: parseInt(group[2]),
+            id: parseInt(exec[2]),
             title: $(selectors.title(i)).text().trim(),
             summary: $(selectors.summary(i)).text().trim(),
             date: `${$(selectors.month(i)).text().trim()}-${$(selectors.day(i)).text().trim()}`,
-            link: `${hosts.origin}/${group[1]}`,
-            hash: createHash('md5').update(`?id=${group[2]}`).digest('hex'),
+            link: `${hosts.origin}/${exec[1]}`,
+            hash: createHash('md5').update(`?id=${exec[2]}`).digest('hex'),
         });
     }
     return news;
@@ -77,7 +82,12 @@ export async function newslist(count = 10, index = 0) {
     let $ = htmlLoad(await (await fetch(hosts.main, { headers, method: 'GET' })).text());
     
     // Parse the first page
-    const maxpage = parseInt(nextpage_href.exec($(selectors.nextpage).attr('href')!)![1]!);
+    const _btn = $(selectors.nextpage);
+    const _att = _btn.attr('href');
+    if (!_att) throw new InvalidContentError(`Next page button href not found: ${_btn.text()}`);
+    const _btn_exec = nextpage_href.exec(_att);
+    if (!_btn_exec || !_btn_exec[1]) throw new InvalidContentError(`Next page button href invalid: ${_att}`);
+    const maxpage = parseInt(_btn_exec[1]);
     let news = parseNews($);
 
     // Fetch more pages

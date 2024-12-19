@@ -4,13 +4,11 @@ export const runtime = 'nodejs';
 
 // Dependencies
 import { paramInt, paramString, data, error } from '@/lib/utils';
-import { ParamError } from '@/lib/errors';
-import { news } from '.';
-import { NextRequest } from 'next/server';
+import { APIError } from '@/lib/errors';
+import { news } from './index';
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
 
-    console.log(request.nextUrl.searchParams.get('id'));
     // Parse and check parameters
     try {
         const _id = paramInt(request, 'id');
@@ -19,8 +17,9 @@ export async function GET(request: NextRequest) {
     }
     // Handle errors
     catch (err) {
-        if (err instanceof ParamError)
-            return error(err, 400);
+        console.error(err);
+        if (err instanceof APIError)
+            return error(err);
         if (err instanceof Error)
             return error(err, 500);
     }

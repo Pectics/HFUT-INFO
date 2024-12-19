@@ -1,4 +1,5 @@
 // Dependencies
+import { InvalidContentError } from '@/lib/errors';
 import { load as htmlLoad } from 'cheerio';
 import { createHash } from 'crypto';
 
@@ -62,8 +63,17 @@ const image_alt_style_regex = /.*text-align: *center;?/;
 export async function news(id: number, format: 'array' | 'markdown' = 'array') {
     const $ = htmlLoad(await (await fetch(hosts.info(id), { headers, method: 'GET' })).text());
     const title = $(selectors.title).text().trim();
-    const date = date_regex.exec($(selectors.date).text().trim())![1];
-    const source = source_regex.exec($(selectors.source).text().trim())![1];
+
+    const date_str = $(selectors.date).text().trim();
+    const date_exec = date_regex.exec(date_str);
+    if (!date_exec) throw new InvalidContentError(date_str);
+    const date = date_exec[1];
+
+    const source_str = $(selectors.source).text().trim();
+    const source_exec = source_regex.exec(source_str);
+    if (!source_exec) throw new InvalidContentError(source_str);
+    const source = $(selectors.source).text().trim();
+
 
     let editor = null as string | null;
     let editor_str = null as string | null;
@@ -73,11 +83,13 @@ export async function news(id: number, format: 'array' | 'markdown' = 'array') {
     let _last = $(selectors.editor);
     if (_last.hasClass('vsbcontent_end')) {
         editor_str = _last.text().trim();
-        editor = editor_regex.exec(editor_str)![1];
+        const exec = editor_regex.exec(editor_str);
+        if (exec) editor = exec[1];
+        else throw new InvalidContentError(editor_str);
     }
     _last = _last.prev();
-    if (_last.attr('style') &&
-        author_style_regex.test(_last.attr('style')!) &&
+    const _last_style = _last.attr('style');
+    if (_last_style && author_style_regex.test(_last_style) &&
         author_regex.test(_last.text())
     ) {
         let _author = _last.text().trim().replaceAll(/\/(?:文|图|审核)/g, '/');
@@ -104,10 +116,15 @@ export async function news(id: number, format: 'array' | 'markdown' = 'array') {
         if (_current.hasClass('vsbcontent_img')) {
             const image = {
                 type: 'image' as const,
-                url: `${hosts.origin}${_current.find('img').attr('src')!}`,
+                url: `${hosts.origin}${(() => {
+                    const img_src = _current.find('img').attr('src');
+                    if (!img_src) throw new InvalidContentError(_current.find('img').text());
+                    return img_src;
+                })()}`,
                 alt: null as string | null,
             };
-            if (_current.next().attr('style') && image_alt_style_regex.test(_current.next().attr('style')!)) {
+            const _next_style = _current.next().attr('style');
+            if (_next_style && image_alt_style_regex.test(_next_style)) {
                 let alt = _current = _current.next();
                 while (alt.length && alt.text().trim() === '') alt = alt.first();
                 image.alt = alt.text().trim();

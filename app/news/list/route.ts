@@ -4,8 +4,8 @@ export const runtime = 'nodejs';
 
 // Dependencies
 import { paramInt, data, error } from '@/lib/utils';
-import { ParamError } from '@/lib/errors';
-import { newslist } from '.';
+import { APIError } from '@/lib/errors';
+import { newslist } from './index';
 
 export async function GET(request: Request) {
 
@@ -17,8 +17,9 @@ export async function GET(request: Request) {
     }
     // Handle errors
     catch (err) {
-        if (err instanceof ParamError)
-            return error(err, 400);
+        console.error(err);
+        if (err instanceof APIError)
+            return error(err);
         if (err instanceof Error)
             return error(err, 500);
     }

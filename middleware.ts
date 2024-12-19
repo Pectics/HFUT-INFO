@@ -1,14 +1,10 @@
+import CONFIG from '@/config';
+import { error } from '@/lib/utils';
 import { NextRequest, NextResponse } from 'next/server';
-import { error } from './lib/utils';
 
-const apis: { [base: string]: string[] } = {};
-
-Object.entries({
-    '/news': [
-        '/list',
-        '/:id\\d+',
-    ],
-}).forEach(([base, endpoints]) => {
+// API config validation
+const API: { [base: string]: string[] } = {};
+Object.entries(CONFIG.API).forEach(([base, endpoints]) => {
     if (!/^(?:\/[a-z_\d\-]+)+$/i.test(base)) {
         console.error(`Invalid API base: ${base}`);
         return;
@@ -17,13 +13,13 @@ Object.entries({
         console.error(`Invalid API endpoints: ${endpoints}`);
         return;
     }
-    if (!apis[base]) apis[base] = [];
+    if (!API[base]) API[base] = [];
     endpoints.forEach(endpoint => {
         if (!/^(?:\/(?:[a-z_\d\-]+|:[a-z_][a-z_\d]*[^\/]*))+$/i.test(endpoint)) {
             console.error(`Invalid API endpoint: ${endpoint}`);
             return;
         }
-        apis[base].push(endpoint);
+        API[base].push(endpoint);
     });
 });
 
@@ -34,12 +30,11 @@ export function middleware(request: NextRequest) {
     const path = request.nextUrl.pathname;
 
     // Find the matched base
-    for (const [base, endpoints] of Object.entries(apis)) {
+    for (const [base, endpoints] of Object.entries(API)) {
 
         // Not starts with the base
         if (!path.startsWith(base)) continue;
 
-            let id = 0;
         // Base matched, find the matched endpoint
         FindNext: for (let endpoint of endpoints) {
 
@@ -49,6 +44,7 @@ export function middleware(request: NextRequest) {
             
             // Check each part of the endpoint
             let part: string | undefined;
+            let params: [string, string][] = [];
             while (part = /^\/(?:[a-z_\d\-]+|:[a-z_][a-z_\d]*[^\/]*)/i.exec(endpoint)?.[0]) {
 
                 // Check if the part is a parameter
@@ -60,8 +56,7 @@ export function middleware(request: NextRequest) {
                     const pattern = param[2] !== '' ? param[2] : '[a-z_\d\-]+';
                     const vmatch = new RegExp(`^/(${pattern})(?=/|$)`, 'i').exec(copypath);
                     if (!vmatch) continue FindNext;
-                    id = parseInt(vmatch[1]);
-                    request.nextUrl.searchParams.append(key, vmatch[1]);
+                    params.push([key, vmatch[1]]);
                     copypath = copypath.slice(vmatch[0].length);
                     endpoint = endpoint.slice(part.length);
                     realpath += '/$';
@@ -76,12 +71,20 @@ export function middleware(request: NextRequest) {
             }
 
             // Return the matched endpoint
-            // console.log(`https://hfut.info/api/news?id=${id}`);
-            // console.log(`Re-source to ${request.nextUrl.origin}${base}${realpath}${request.nextUrl.search}`);
-            return NextResponse.rewrite(
-                `${request.nextUrl.origin}${base}${realpath}${request.nextUrl.search}`,
-                { request }
-            )
+            const url = new URL(`${base}${realpath}`, request.url);
+            request.nextUrl.searchParams.forEach((value, key) =>
+                request.headers.append(`${
+                    CONFIG.HEADER_PARAM_PREFIX ||
+                    process.env.HEADER_PARAM_PREFIX ||
+                    'X-HFUT-'
+                }${key}`, value));
+            params.forEach(([key, value]) =>
+                request.headers.append(`${
+                    CONFIG.HEADER_PARAM_PREFIX ||
+                    process.env.HEADER_PARAM_PREFIX ||
+                    'X-HFUT-'
+                }${key}`, value));
+            return NextResponse.rewrite(url, { request });
         }
 
         // No endpoint matched
