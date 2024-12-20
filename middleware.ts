@@ -18,7 +18,7 @@ Object.entries(CONFIG.API).forEach(([base, endpoints]) => {
     }
     if (!API[base]) API[base] = [];
     endpoints.forEach(endpoint => {
-        if (!/^(?:\/(?:[a-z_\d\-]+|:[a-z_][a-z_\d]*[^\/]*))+$/i.test(endpoint)) {
+        if (!/^(?:\/|(?:\/(?:[a-z_\d\-]+|:[a-z_][a-z_\d]*[^\/]*))+)$/i.test(endpoint)) {
             console.error(`Invalid API endpoint: ${endpoint}`);
             return;
         }
@@ -49,7 +49,9 @@ export function middleware(request: NextRequest) {
         FindNext: for (let endpoint of endpoints) {
 
             // Create copies of the path
-            let copypath = path.slice(base.length);
+            let pathcopy = path.slice(base.length);
+            if (!pathcopy.endsWith('/'))
+                pathcopy += '/'; // compate with `/` endpoint
             let realpath = '';
             
             // Check each part of the endpoint
@@ -64,18 +66,18 @@ export function middleware(request: NextRequest) {
                 if (param) {
                     const key = param[1];
                     const pattern = param[2] !== '' ? param[2] : '[a-z_\d\-]+';
-                    const vmatch = new RegExp(`^/(${pattern})(?=/|$)`, 'i').exec(copypath);
+                    const vmatch = new RegExp(`^/(${pattern})(?=/|$)`, 'i').exec(pathcopy);
                     if (!vmatch) continue FindNext;
                     params.push([key, vmatch[1]]);
-                    copypath = copypath.slice(vmatch[0].length);
+                    pathcopy = pathcopy.slice(vmatch[0].length);
                     endpoint = endpoint.slice(part.length);
                     realpath += '/$';
                     continue;
                 }
                 // Is a `/path` like part and not starts with it
-                else if (!copypath.startsWith(part)) continue FindNext;
+                else if (!pathcopy.startsWith(part)) continue FindNext;
                 // Is a `/path` like part and starts with it
-                copypath = copypath.slice(part.length);
+                pathcopy = pathcopy.slice(part.length);
                 endpoint = endpoint.slice(part.length);
                 realpath += part;
             }
