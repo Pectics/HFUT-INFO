@@ -1,8 +1,7 @@
 // Dependencies
-import { InvalidContentError } from '@/lib/errors';
+import { UpstreamError } from '@/lib/errors';
 import { load as htmlLoad } from 'cheerio';
 import { createHash } from 'crypto';
-import { link } from 'fs';
 
 // Configs
 const hosts = {
@@ -69,12 +68,12 @@ export async function news(id: number, format: 'array' | 'markdown' = 'array') {
 
     const date_str = $(selectors.date).text().trim();
     const date_exec = date_regex.exec(date_str);
-    if (!date_exec) throw new InvalidContentError(date_str);
+    if (!date_exec) throw new UpstreamError(`Invalid date string: ${date_str}`);
     const date = date_exec[1];
 
     const source_str = $(selectors.source).text().trim();
     const source_exec = source_regex.exec(source_str);
-    if (!source_exec) throw new InvalidContentError(source_str);
+    if (!source_exec) throw new UpstreamError(`Invalid source string: ${source_str}`);
     const source = $(selectors.source).text().trim();
 
 
@@ -88,7 +87,7 @@ export async function news(id: number, format: 'array' | 'markdown' = 'array') {
         editor_str = _last.text().trim();
         const exec = editor_regex.exec(editor_str);
         if (exec) editor = exec[1];
-        else throw new InvalidContentError(editor_str);
+        else throw new UpstreamError(`Invalid editor string: ${editor_str}`);
     }
     _last = _last.prev();
     const _last_style = _last.attr('style');
@@ -120,8 +119,9 @@ export async function news(id: number, format: 'array' | 'markdown' = 'array') {
             const image = {
                 type: 'image' as const,
                 url: `${hosts.origin}${(() => {
-                    const img_src = _current.find('img').attr('src');
-                    if (!img_src) throw new InvalidContentError(_current.find('img').text());
+                    const img_ele = _current.find('img');
+                    const img_src = img_ele.attr('src');
+                    if (!img_src) throw new UpstreamError(`Image source not found: ${img_ele.text()}`);
                     return img_src;
                 })()}`,
                 alt: undefined as string | undefined,
@@ -166,7 +166,7 @@ export async function news(id: number, format: 'array' | 'markdown' = 'array') {
 
     return {
         id, title, date, source, editor, authors, content, link: hosts.info(id),
-        hash: createHash('md5').update((() => {
+        hash: createHash('sha1').update((() => {
             const params = new URLSearchParams();
             params.append('id', id.toString());
             params.append('title', title);

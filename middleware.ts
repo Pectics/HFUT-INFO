@@ -88,13 +88,13 @@ export function middleware(request: NextRequest) {
                 request.headers.append(`${
                     CONFIG.HEADER_PARAM_PREFIX ||
                     process.env.HEADER_PARAM_PREFIX ||
-                    'X-HFUT-'
+                    'X-HFUTINFO-'
                 }${key}`, value));
             params.forEach(([key, value]) =>
                 request.headers.append(`${
                     CONFIG.HEADER_PARAM_PREFIX ||
                     process.env.HEADER_PARAM_PREFIX ||
-                    'X-HFUT-'
+                    'X-HFUTINFO-'
                 }${key}`, value));
             return NextResponse.rewrite(url, { request });
         }

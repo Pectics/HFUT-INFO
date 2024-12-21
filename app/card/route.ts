@@ -3,17 +3,16 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 // Dependencies
-import { paramInt, data, error } from '@/lib/utils';
+import { header, data, error } from '@/lib/utils';
 import { APIError } from '@/lib/errors';
-import { news } from './index';
+import { card } from './index';
 
 export async function GET(request: Request) {
 
-    // Parse and check parameters
+    // Parse and check body
     try {
-        const _count = paramInt(request, 'count', 10, [1, 100]);
-        const _index = paramInt(request, 'index', 0, [0, null]);
-        return data(await news(_count, _index));
+        const _access_token = header(request, 'Access-Token');
+        return data(await card(_access_token));
     }
     // Handle errors
     catch (err) {

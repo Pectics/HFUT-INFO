@@ -1,5 +1,5 @@
 // Dependencies
-import { InvalidContentError } from "@/lib/errors";
+import { UpstreamError } from "@/lib/errors";
 import { CheerioAPI, load as htmlLoad } from "cheerio";
 import { createHash } from 'crypto';
 
@@ -46,16 +46,16 @@ function parseNews($: CheerioAPI) {
     for (let i = 1; i <= count; i++) {
         const item = $(selectors.item(i));
         const href = item.attr('href');
-        if (!href) throw new InvalidContentError(`News item href not found: ${item.text()}`);
+        if (!href) throw new UpstreamError(`News item href not found: ${item.text()}`);
         const exec = news_href.exec(href);
-        if (!exec) throw new InvalidContentError(`News item href invalid: ${href}`);
+        if (!exec) throw new UpstreamError(`News item href invalid: ${href}`);
         news.push({
             id: parseInt(exec[2]),
             title: $(selectors.title(i)).text().trim(),
             summary: $(selectors.summary(i)).text().trim(),
             date: `${$(selectors.month(i)).text().trim()}-${$(selectors.day(i)).text().trim()}`,
             link: `${hosts.origin}/${exec[1]}`,
-            hash: createHash('md5').update((() => {
+            hash: createHash('sha1').update((() => {
                 const params = new URLSearchParams();
                 params.append('id', exec[2]);
                 return `news_summary?${params.toString()}`;
@@ -80,7 +80,7 @@ function parseNews($: CheerioAPI) {
  * - link: The URL of the news article.
  * - hash: A unique hash generated from the id of the news article.
  */
-export async function newslist(count = 10, index = 0) {
+export async function news(count = 10, index = 0) {
 
     // Fetch the main page
     let $ = htmlLoad(await (await fetch(hosts.main, { headers, method: 'GET' })).text());
@@ -88,9 +88,9 @@ export async function newslist(count = 10, index = 0) {
     // Parse the first page
     const _btn = $(selectors.nextpage);
     const _att = _btn.attr('href');
-    if (!_att) throw new InvalidContentError(`Next page button href not found: ${_btn.text()}`);
+    if (!_att) throw new UpstreamError(`Next page button href not found: ${_btn.text()}`);
     const _btn_exec = nextpage_href.exec(_att);
-    if (!_btn_exec || !_btn_exec[1]) throw new InvalidContentError(`Next page button href invalid: ${_att}`);
+    if (!_btn_exec || !_btn_exec[1]) throw new UpstreamError(`Next page button href invalid: ${_att}`);
     const maxpage = parseInt(_btn_exec[1]);
     let news = parseNews($);
 

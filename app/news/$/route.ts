@@ -12,8 +12,8 @@ export async function GET(request: Request) {
     // Parse and check parameters
     try {
         const _id = paramInt(request, 'id');
-        const _fmt = paramString(request, 'fmt', 'array', ['array', 'markdown']) as 'array' | 'markdown';
-        return data(await news(_id, _fmt));
+        const _format = paramString(request, 'format', 'array', ['array', 'markdown']) as 'array' | 'markdown';
+        return data(await news(_id, _format));
     }
     // Handle errors
     catch (err) {
