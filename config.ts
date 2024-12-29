@@ -4,9 +4,10 @@ export default {
             '/:id\\d+',
             '/',
         ],
-        '/card': [
+        '/synjones': [
             '/token',
-            '/',
+            '/card',
+            '/water',
         ]
     },
     HEADER_PARAM_PREFIX: 'X-HFUTINFO-',

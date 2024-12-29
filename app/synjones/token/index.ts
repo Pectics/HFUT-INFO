@@ -13,7 +13,35 @@ const headers = {
     'Pragma': 'no-cache',
 };
 
-async function _request(body: string, password: string) {
+/**
+ * Requests a new token from the authentication server.
+ *
+ * @param {string} body - The request body to be sent to the authentication server.
+ * @param {string} password - The password used for authentication.
+ * @returns {Promise<{id: number, uuid: string, is_first_login: boolean, username: string, name: string, access_token: string, refresh_token: string}>} 
+ *          An object containing the new token data:
+ *          - `id`: The user ID.
+ *          - `uuid`: The user UUID.
+ *          - `is_first_login`: Whether this is the user's first login.
+ *          - `username`: The user's username.
+ *          - `name`: The user's name.
+ *          - `access_token`: The new access token.
+ *          - `refresh_token`: The new refresh token.
+ * @throws {AuthenticationError} If the refresh token is invalid.
+ * @throws {UpstreamError} If the response data is invalid or incomplete.
+ * @throws {APIError} If the API request fails.
+ * @private
+ */
+async function _request_token(body: string, password: string):
+    Promise<{
+        id: number;
+        uuid: string;
+        is_first_login: boolean;
+        username: string;
+        name: string;
+        access_token: string;
+        refresh_token: string;
+    }> {
 
     // Request the token
     const response = await fetch(host, { method: 'POST', headers, body });
@@ -63,14 +91,31 @@ async function _request(body: string, password: string) {
 
 /**
  * Refreshes the access token using the provided refresh token.
- * 
- * @param refresh_token - The refresh token to be used for refreshing the access token.
- * @returns A promise that resolves to an object containing the new token data.
+ *
+ * @param {string} refresh_token - The refresh token to be used for refreshing the access token.
+ * @returns {Promise<{id: number, uuid: string, is_first_login: boolean, username: string, name: string, access_token: string, refresh_token: string}>} 
+ *          An object containing the new token data:
+ *          - `id`: The user ID.
+ *          - `uuid`: The user UUID.
+ *          - `is_first_login`: Whether this is the user's first login.
+ *          - `username`: The user's username.
+ *          - `name`: The user's name.
+ *          - `access_token`: The new access token.
+ *          - `refresh_token`: The new refresh token.
  * @throws {AuthenticationError} If the refresh token is invalid.
  * @throws {UpstreamError} If the response data is invalid or incomplete.
  * @throws {APIError} If the API request fails.
  */
-export async function refresh(refresh_token: string) {
+export async function refresh(refresh_token: string):
+    Promise<{
+        id: number;
+        uuid: string;
+        is_first_login: boolean;
+        username: string;
+        name: string;
+        access_token: string;
+        refresh_token: string;
+    }> {
 
     // Unpatch the token
     const parts = refresh_token.split('.');
@@ -96,20 +141,28 @@ export async function refresh(refresh_token: string) {
     }).toString();
 
     // Request the token
-    return _request(body, password);
+    return _request_token(body, password);
 }
 
 /**
  * Requests a new access token using the provided username and password.
- * 
- * @param username - The username to be used for authentication.
- * @param password - The password to be used for authentication.
- * @returns A promise that resolves to an object containing the new token data.
+ *
+ * @param {string} username - The username to be used for authentication.
+ * @param {string} password - The password to be used for authentication.
+ * @returns {Promise<{id: number, uuid: string, is_first_login: boolean, username: string, name: string, access_token: string, refresh_token: string}>} 
+ *          An object containing the new token data:
+ *          - `id`: The user ID.
+ *          - `uuid`: The user UUID.
+ *          - `is_first_login`: Whether this is the user's first login.
+ *          - `username`: The user's username.
+ *          - `name`: The user's name.
+ *          - `access_token`: The new access token.
+ *          - `refresh_token`: The new refresh token.
  * @throws {AuthenticationError} If the username or password is incorrect.
  * @throws {UpstreamError} If the response data is invalid or incomplete.
  * @throws {APIError} If the API request fails.
  */
-export async function token(username: string, password: string) {
+export async function token(username: string, password: string): Promise<{ id: number; uuid: string; is_first_login: boolean; username: string; name: string; access_token: string; refresh_token: string; }> {
 
     // Fill in the body
     const body = new URLSearchParams({
@@ -124,5 +177,5 @@ export async function token(username: string, password: string) {
     }).toString();
 
     // Request the token
-    return _request(body, password);
+    return _request_token(body, password);
 }

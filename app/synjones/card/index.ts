@@ -15,19 +15,55 @@ const headers = {
     'Connection': 'keep-alive',
     // Necessary for the request to succeed
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36 Edg/129.0.0.0',
-    'Synjones-Auth': 'Bearer ', // Fill this in later
+    'Synjones-Auth': '', // Fill this in later
 };
 
 /**
  * Fetches card and user information using the provided access token.
- * 
- * @param access_token - The access token to authenticate the requests.
- * @returns An object containing card and user information.
+ *
+ * @param {string} access_token - The access token to authenticate the requests.
+ * @returns {Promise<{id: number, name: string, balance: number, pending: number, is_lost: boolean, is_frozen: boolean, transfer_flag: number, bank_account?: string, profile: {id: number, username: string, idcard?: string, name: string, sex: string, department: string, grade: string}}>} 
+ *          An object containing card and user information:
+ *          - `id`: The card ID.
+ *          - `name`: The cardholder's name.
+ *          - `balance`: The card balance.
+ *          - `pending`: The unsettled amount.
+ *          - `is_lost`: Whether the card is reported lost.
+ *          - `is_frozen`: Whether the card is frozen.
+ *          - `transfer_flag`: The auto-transfer flag.
+ *          - `bank_account?`: The bank account associated with the card (if sensitive data is enabled).
+ *          - `profile`: The user's profile information:
+ *              - `id`: The user ID.
+ *              - `username`: The user's account name.
+ *              - `idcard?`: The user's ID card number (if sensitive data is enabled).
+ *              - `name`: The user's name.
+ *              - `sex`: The user's sex ('female' or 'male').
+ *              - `department`: The user's department name.
+ *              - `grade`: The user's grade or identity name.
  * @throws {UpstreamError} If the response data is invalid or incomplete.
  * @throws {AuthenticationError} If the access token is incorrect.
  * @throws {APIError} If there is an internal server error.
  */
-export async function card(access_token: string) {
+export async function card(access_token: string):
+    Promise<{
+        id: number;
+        name: string;
+        balance: number;
+        pending: number;
+        is_lost: boolean;
+        is_frozen: boolean;
+        transfer_flag: number;
+        bank_account?: string;
+        profile: {
+            id: number;
+            username: string;
+            idcard?: string;
+            name: string;
+            sex: string;
+            department: string;
+            grade: string;
+        };
+    }> {
 
     // Fill in the headers
     headers['Synjones-Auth'] = `Bearer ${access_token}`;
@@ -45,7 +81,6 @@ export async function card(access_token: string) {
     if (!card?.data?.card?.[0])
         throw new UpstreamError(`Card data incomplete`);
     card = card.data.card[0];
-    card_res.headers.forEach((value, key) => console.log(key, value));
 
     // Request the user
     const user_res = await fetch(hosts.user, { method: 'GET', headers });
