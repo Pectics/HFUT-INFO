@@ -14,8 +14,8 @@ export class APIError extends Error {
 }
 
 export class ParamError extends APIError {
-    constructor(key: string, got: any) {
-        super(got ? `Invalid parameter: ${key}, got ${got}` : `Missing parameter: ${key}`, 400);
+    constructor(key: string, got: any, expected?: string) {
+        super(got ? `Invalid parameter: ${key},${expected ? ` ${expected} expected but` : ''} got ${got}` : `Missing parameter: ${key}`, 400);
         this.name = 'ParamError';
     }
 }

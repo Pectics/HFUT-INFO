@@ -1,15 +1,16 @@
 // Dependencies
-import { UpstreamError } from "@/lib/errors";
+import config from '@/config';
+import { ParamError, UpstreamError } from "@/lib/errors";
 import { CheerioAPI, load as htmlLoad } from "cheerio";
 import { createHash } from 'crypto';
 
 // Configs
-const ncount = 10; // Amount of news per page, also the default amount of news to get
+const ncount = 10;
 const hosts = {
     origin: 'https://news.hfut.edu.cn',
-    main: 'https://news.hfut.edu.cn/gdyw1.htm',
+    main: (cat: string) => `https://news.hfut.edu.cn/${cat}.htm`,
     // rn is a reversed page number
-    page: (rn: number) => `https://news.hfut.edu.cn/gdyw1/${rn}.htm`,
+    page: (cat: string, rn: number) => `https://news.hfut.edu.cn/${cat}/${rn}.htm`,
 };
 const headers = {
     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
@@ -37,8 +38,8 @@ const selectors = {
     title: (i: number) => `body > div.list04.wrap > ul > li:nth-child(${i}) > a > div.text > h5`,
     summary: (i: number) => `body > div.list04.wrap > ul > li:nth-child(${i}) > a > div.text > p`,
 };
-const nextpage_href = /gdyw1\/([0-9]+)\.htm/;
-const news_href = /(?:\.\.\/)?(info\/1011\/([0-9]+)\.htm)/;
+const nextpage_href = (cat: string) => new RegExp(`${cat}/([0-9]+)\\.htm`);
+const news_href = /(?:\.\.\/)?(info\/\d{4}\/([0-9]+)\.htm)/;
 type News = {
     id: number,
     title: string,
@@ -78,6 +79,7 @@ function page2news($: CheerioAPI, count = ncount, index = 0) {
 /**
  * Fetches and returns a list of news articles.
  *
+ * @param category - The category of news articles to return.
  * @param count - The number of news articles to return.
  * @param index - The index of the first news article to return.
  * @returns An array of news articles.
@@ -90,16 +92,19 @@ function page2news($: CheerioAPI, count = ncount, index = 0) {
  * - link: The URL of the news article.
  * - hash: A unique hash generated from the id of the news article.
  */
-export async function news(count = 10, index = 0) {
+export async function news(category = 0, count = 10, index = 0) {
+    // Check category
+    const cat = config.NEWS_CATEGORIES[category];
+    if (!cat) throw new ParamError('category', category, `0-${config.NEWS_CATEGORIES.length - 1}`);
 
     // Fetch the main page
-    let $ = htmlLoad(await (await fetch(hosts.main, { headers, method: 'GET' })).text());
+    let $ = htmlLoad(await (await fetch(hosts.main(cat[1]), { headers, method: 'GET' })).text());
     
     // Parse page count
     const _btn = $(selectors.nextpage);
     const _att = _btn.attr('href');
     if (!_att) throw new UpstreamError(`Next page button href not found: ${_btn.text()}`);
-    const _btn_exec = nextpage_href.exec(_att);
+    const _btn_exec = nextpage_href(cat[1]).exec(_att);
     if (!_btn_exec || !_btn_exec[1]) throw new UpstreamError(`Next page button href invalid: ${_att}`);
 
     const maxpage = parseInt(_btn_exec[1]) + 1; // page is 1-based
@@ -113,7 +118,7 @@ export async function news(count = 10, index = 0) {
     const _flag = startpage === 1;
     if (_flag) news.push(...page2news($, count, index));
     for (let i = +_flag + startpage; i <= endpage; i++) {
-        $ = htmlLoad(await (await fetch(hosts.page(maxpage - i + 1), { headers, method: 'GET' })).text());
+        $ = htmlLoad(await (await fetch(hosts.page(cat[1], maxpage - i + 1), { headers, method: 'GET' })).text());
         news.push(...page2news($, count -= news.length));
     }
 

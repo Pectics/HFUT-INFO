@@ -11,9 +11,10 @@ export async function GET(request: Request) {
 
     // Parse and check parameters
     try {
+        const _category = paramInt(request, 'category', 0);
         const _count = paramInt(request, 'count', 10, [1, 100]);
         const _index = paramInt(request, 'index', 0, [0, null]);
-        return data(await news(_count, _index));
+        return data(await news(_category, _count, _index));
     }
     // Handle errors
     catch (err) {
