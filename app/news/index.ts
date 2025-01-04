@@ -39,21 +39,31 @@ const selectors = {
 };
 const nextpage_href = /gdyw1\/([0-9]+)\.htm/;
 const news_href = /(?:\.\.\/)?(info\/1011\/([0-9]+)\.htm)/;
+type News = {
+    id: number,
+    title: string,
+    summary: string,
+    date: string,
+    link: string,
+    hash: string,
+};
 
-function parseNews($: CheerioAPI) {
-    const count = Math.min(ncount, $(selectors.list).children().length);
-    const news = [];
-    for (let i = 1; i <= count; i++) {
-        const item = $(selectors.item(i));
+function page2news($: CheerioAPI, count = ncount, index = 0) {
+    if (count <= 0 || index >= ncount) return [];
+    count = Math.min(count, ncount, $(selectors.list).children().length);
+    const news = [] as News[];
+    // Convert `count` to end index(max `ncount`), and `index` to 1-based
+    for (count = Math.min(ncount, count + index++); index <= count; index++) {
+        const item = $(selectors.item(index));
         const href = item.attr('href');
         if (!href) throw new UpstreamError(`News item href not found: ${item.text()}`);
         const exec = news_href.exec(href);
         if (!exec) throw new UpstreamError(`News item href invalid: ${href}`);
         news.push({
             id: parseInt(exec[2]),
-            title: $(selectors.title(i)).text().trim(),
-            summary: $(selectors.summary(i)).text().trim(),
-            date: `${$(selectors.month(i)).text().trim()}-${$(selectors.day(i)).text().trim()}`,
+            title: $(selectors.title(index)).text().trim(),
+            summary: $(selectors.summary(index)).text().trim(),
+            date: `${$(selectors.month(index)).text().trim()}-${$(selectors.day(index)).text().trim()}`,
             link: `${hosts.origin}/${exec[1]}`,
             hash: createHash('sha1').update((() => {
                 const params = new URLSearchParams();
@@ -85,25 +95,27 @@ export async function news(count = 10, index = 0) {
     // Fetch the main page
     let $ = htmlLoad(await (await fetch(hosts.main, { headers, method: 'GET' })).text());
     
-    // Parse the first page
+    // Parse page count
     const _btn = $(selectors.nextpage);
     const _att = _btn.attr('href');
     if (!_att) throw new UpstreamError(`Next page button href not found: ${_btn.text()}`);
     const _btn_exec = nextpage_href.exec(_att);
     if (!_btn_exec || !_btn_exec[1]) throw new UpstreamError(`Next page button href invalid: ${_att}`);
-    const maxpage = parseInt(_btn_exec[1]);
-    let news = parseNews($);
 
-    // Fetch more pages
-    if (news.length < index + count) {
-        const startpage = Math.floor(index / ncount);
-        const pagecount = Math.ceil((index + count - news.length) / ncount);
-        if (startpage !== 0) news = [];
-        for (let i = 0; i < pagecount; i++) {
-            $ = htmlLoad(await (await fetch(hosts.page(maxpage - startpage - i), { headers, method: 'GET' })).text());
-            news.push(...parseNews($));
-        }
+    const maxpage = parseInt(_btn_exec[1]) + 1; // page is 1-based
+    // trans 0-9 to int by 10, so use Math.floor + 1
+    const startpage = Math.floor(index / ncount) + 1;
+    // trans 1-10 to int by 10, so use Math.ceil
+    const endpage = Math.min(maxpage, Math.ceil((index + count) / ncount));
+
+    // Fetch the news
+    const news = [] as News[];
+    const _flag = startpage === 1;
+    if (_flag) news.push(...page2news($, count, index));
+    for (let i = +_flag + startpage; i <= endpage; i++) {
+        $ = htmlLoad(await (await fetch(hosts.page(maxpage - i + 1), { headers, method: 'GET' })).text());
+        news.push(...page2news($, count -= news.length));
     }
 
-    return news.slice(index % ncount, index % ncount + count);
+    return news;
 }
