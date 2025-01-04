@@ -87,7 +87,6 @@ export async function news(id: number, format: 'array' | 'markdown' = 'array') {
         editor_str = _last.text().trim();
         const exec = editor_regex.exec(editor_str);
         if (exec) editor = exec[1];
-        else throw new UpstreamError(`Invalid editor string: ${editor_str}`);
     }
     _last = _last.prev();
     const _last_style = _last.attr('style');
@@ -101,7 +100,7 @@ export async function news(id: number, format: 'array' | 'markdown' = 'array') {
             matches.forEach((m) => _authors.add(m));
         if ((matches = _author.match(/[A-Za-z\.·]+(?: [A-Za-z\.·]+)*/g)) !== null && matches.length > 0)
             matches.forEach((m) => _authors.add(m));
-        authors = [..._authors];
+        if (_authors.size > 0) authors = [..._authors];
     }
 
     // Parse content
