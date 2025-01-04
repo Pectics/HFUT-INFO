@@ -126,11 +126,11 @@ export async function card(access_token: string):
         is_lost: card.lostflag === 1,
         is_frozen: card.freezeflag === 1,
         transfer_flag: card.autotrans_flag,
-        bank_account: config.CARD_SENSITIVE_DATA ? card.bankacc : undefined,
+        bank_account: config.SYNJONES_SENSITIVE ? card.bankacc : undefined,
         profile: {
             id: user.id,
             username: user.account,
-            idcard: config.CARD_SENSITIVE_DATA ? card.cert : undefined,
+            idcard: config.SYNJONES_SENSITIVE ? card.cert : undefined,
             name: user.name,
             sex: ['female', 'male'][user.sex],
             department: user.departmentName,
