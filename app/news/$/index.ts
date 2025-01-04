@@ -97,7 +97,6 @@ export async function news(id: number, category: number, format: 'array' | 'mark
         for (const [cat, [node]] of config.NEWS_CATEGORIES.entries()) {
             if (node === null) continue;
             _res = await fetch(hosts.info(node, id), { headers });
-            console.log(_res.status);
             if (_res.status === 200) {
                 category = cat;
                 break;
