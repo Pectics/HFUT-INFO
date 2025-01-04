@@ -64,6 +64,7 @@ export async function news(id: number, format: 'array' | 'markdown' = 'array') {
     const _res = await fetch(hosts.info(id), { headers, method: 'GET' });
     if (_res.status === 404) throw new Error('Resource Not Found');
     const $ = htmlLoad(await _res.text());
+
     const title = $(selectors.title).text().trim();
 
     const date_str = $(selectors.date).text().trim();
@@ -74,7 +75,7 @@ export async function news(id: number, format: 'array' | 'markdown' = 'array') {
     const source_str = $(selectors.source).text().trim();
     const source_exec = source_regex.exec(source_str);
     if (!source_exec) throw new UpstreamError(`Invalid source string: ${source_str}`);
-    const source = $(selectors.source).text().trim();
+    const source = source_exec[1];
 
 
     let editor = null as string | null;
