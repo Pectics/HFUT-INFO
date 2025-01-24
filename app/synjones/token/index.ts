@@ -106,17 +106,15 @@ async function _request_token(body: string, password: string):
  * @throws {UpstreamError} If the response data is invalid or incomplete.
  * @throws {APIError} If the API request fails.
  */
-export async function refresh(refresh_token: string):
-    Promise<{
-        id: number;
-        uuid: string;
-        is_first_login: boolean;
-        username: string;
-        name: string;
-        access_token: string;
-        refresh_token: string;
-    }> {
-
+export async function refresh(refresh_token: string): Promise<{
+    id: number;
+    uuid: string;
+    is_first_login: boolean;
+    username: string;
+    name: string;
+    access_token: string;
+    refresh_token: string;
+}> {
     // Unpatch the token
     const parts = refresh_token.split('.');
     if (parts.length !== 3)
@@ -162,8 +160,15 @@ export async function refresh(refresh_token: string):
  * @throws {UpstreamError} If the response data is invalid or incomplete.
  * @throws {APIError} If the API request fails.
  */
-export async function token(username: string, password: string): Promise<{ id: number; uuid: string; is_first_login: boolean; username: string; name: string; access_token: string; refresh_token: string; }> {
-
+export async function token(username: string, password: string): Promise<{
+    id: number;
+    uuid: string;
+    is_first_login: boolean;
+    username: string;
+    name: string;
+    access_token: string;
+    refresh_token: string;
+}> {
     // Fill in the body
     const body = new URLSearchParams({
         grant_type: 'password',

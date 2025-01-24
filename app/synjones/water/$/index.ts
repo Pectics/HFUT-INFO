@@ -36,16 +36,14 @@ const body = {
  * @throws {AuthenticationError} If the access token is incorrect.
  * @throws {APIError} If there is an error with the API request or the account is not found.
  */
-export async function water(access_token: string, phone: string):
-    Promise<{
-        id: number;
-        student_id: string;
-        phone: string;
-        balance: number;
-        is_code: boolean;
-        is_card: boolean;
-    }> {
-
+export async function water(access_token: string, phone: string): Promise<{
+    id: number;
+    student_id: string;
+    phone: string;
+    balance: number;
+    is_code: boolean;
+    is_card: boolean;
+}> {
     // Fill in the headers
     body.telPhone = phone;
     const body_str = new URLSearchParams(body).toString();

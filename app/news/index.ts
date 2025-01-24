@@ -79,20 +79,32 @@ function page2news($: CheerioAPI, count = ncount, index = 0) {
 /**
  * Fetches and returns a list of news articles.
  *
- * @param category - The category of news articles to return.
- * @param count - The number of news articles to return.
- * @param index - The index of the first news article to return.
- * @returns An array of news articles.
- * 
- * The returned array contains objects with the following structure:
- * - id: The unique identifier for the news article.
- * - title: The title of the news article.
- * - summary: The summary of the news article.
- * - date: The publication date of the news article.
- * - link: The URL of the news article.
- * - hash: A unique hash generated from the id of the news article.
+ * @param {number} [category=0] - The category of news articles to return.
+ * @param {number} [count=10] - The number of news articles to return.
+ * @param {number} [index=0] - The index of the first news article to return.
+ * @returns {Promise<{id: number, title: string, summary: string, date: string, link: string, hash: string}[]>} 
+ *          An array of news articles:
+ *          - `id`: The unique identifier for the news article.
+ *          - `title`: The title of the news article.
+ *          - `summary`: The summary of the news article.
+ *          - `date`: The publication date of the news article.
+ *          - `link`: The URL of the news article.
+ *          - `hash`: A unique hash generated from the id of the news article.
+ * @throws {ParamError} If the category parameter is invalid.
+ * @throws {UpstreamError} If there is an error fetching or parsing the news data.
  */
-export async function news(category = 0, count = 10, index = 0) {
+export async function news(
+    category: number = 0,
+    count: number = 10,
+    index: number = 0
+): Promise<{
+    id: number;
+    title: string;
+    summary: string;
+    date: string;
+    link: string;
+    hash: string;
+}[]> {
     // Check category
     const cat = config.NEWS_CATEGORIES[category];
     if (!cat) throw new ParamError('category', category, `0-${config.NEWS_CATEGORIES.length - 1}`);

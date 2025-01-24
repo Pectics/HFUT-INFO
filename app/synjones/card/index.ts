@@ -44,27 +44,25 @@ const headers = {
  * @throws {AuthenticationError} If the access token is incorrect.
  * @throws {APIError} If there is an internal server error.
  */
-export async function card(access_token: string):
-    Promise<{
+export async function card(access_token: string): Promise<{
+    id: number;
+    name: string;
+    balance: number;
+    pending: number;
+    is_lost: boolean;
+    is_frozen: boolean;
+    transfer_flag: number;
+    bank_account?: string;
+    profile: {
         id: number;
+        username: string;
+        idcard?: string;
         name: string;
-        balance: number;
-        pending: number;
-        is_lost: boolean;
-        is_frozen: boolean;
-        transfer_flag: number;
-        bank_account?: string;
-        profile: {
-            id: number;
-            username: string;
-            idcard?: string;
-            name: string;
-            sex: string;
-            department: string;
-            grade: string;
-        };
-    }> {
-
+        sex: string;
+        department: string;
+        grade: string;
+    };
+}> {
     // Fill in the headers
     headers['Synjones-Auth'] = `Bearer ${access_token}`;
 

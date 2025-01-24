@@ -66,25 +66,38 @@ type Part = {
  * @param id - The unique identifier for the news article.
  * @param category - The category of the news article, if not specified, the search will be traversed.
  * @param format - The format in which to return the content. Can be 'array' or 'markdown'. Defaults to 'array'.
- * @returns An object containing the news article details including id, title, date, source, editor, authors, content, and a hash.
- *
- * The returned object structure:
- * - id: The unique identifier for the news article.
- * - title: The title of the news article.
- * - date: The publication date of the news article.
- * - source: The source of the news article.
- * - editor: The editor of the news article, if available.
- * - authors: An array of authors of the news article, if available.
- * - content: The content of the news article, either as an array of text and image blocks or as a markdown string, depending on the format parameter.
- * - hash: A unique hash generated from the id and title of the news article.
- *
- * The content array contains objects with the following structure:
- * - type: 'image' or 'text'.
- * - url: The URL of the image (only for type 'image').
- * - alt: The alt text of the image (only for type 'image').
- * - text: The text content (only for type 'text').
+ * @returns {Promise<{id: number, category: string, title: string, date: string, source: string, editor: string | null, authors: string[] | null, content: string | Part[], link: string, hash: string}>} 
+ *          An object containing the news article details including:
+ *          - `id`: The unique identifier for the news article.
+ *          - `category`: The category of the news article.
+ *          - `title`: The title of the news article.
+ *          - `date`: The publication date of the news article.
+ *          - `source`: The source of the news article.
+ *          - `editor`: The editor of the news article, if available.
+ *          - `authors`: An array of authors of the news article, if available.
+ *          - `content`: The content of the news article, either as an array of text and image blocks or as a markdown string, depending on the format parameter.
+ *          - `link`: The URL link to the news article.
+ *          - `hash`: A unique hash generated from the id and title of the news article.
+ * @throws {ParamError} If the category parameter is invalid.
+ * @throws {UpstreamError} If the response data is invalid or incomplete.
+ * @throws {APIError} If there is an internal server error.
  */
-export async function news(id: number, category: number, format: 'array' | 'markdown' = 'array') {
+export async function news(
+    id: number,
+    category: number,
+    format: 'array' | 'markdown' = 'array'
+): Promise<{
+    id: number;
+    category: string;
+    title: string;
+    date: string;
+    source: string;
+    editor: string | null;
+    authors: string[] | null;
+    content: string | Part[];
+    link: string;
+    hash: string;
+}> {
     let _res: Response | undefined;
     // Category is specified
     if (!Number.isNaN(category)) {
