@@ -11,7 +11,7 @@ export async function GET(_: Request) {
 
     // Parse and check parameters
     try {
-        return data(laundries());
+        return data(await laundries());
     }
     // Handle errors
     catch (err) {

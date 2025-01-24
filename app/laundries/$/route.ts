@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     // Parse and check parameters
     try {
         const _id = paramInt(request, 'id');
-        return data(laundry(_id));
+        return data(await laundry(_id));
     }
     // Handle errors
     catch (err) {
