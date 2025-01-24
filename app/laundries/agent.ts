@@ -84,6 +84,11 @@ async function fetch_machines(code: string): Promise<MachineRaw[]> {
     const body_str = new URLSearchParams(body).toString();
     headers['Content-Length'] = body_str.length.toString();
     const res = await fetch(host, { method: 'POST', headers, body: body_str });
+    if (!res.ok) {
+        console.error(`Failed to fetch machines of laundry(${code}): ${res.status} ${res.statusText}`);
+        console.error(await res.text());
+        throw new UpstreamError(`Failed to fetch machines of laundry(${code}): ${res.statusText}`);
+    }
     const data = await res.json();
     if (!data?.data?.items)
         throw new UpstreamError(`Invalid response data to get machines of laundry(${code}): ${JSON.stringify(data)}`);
