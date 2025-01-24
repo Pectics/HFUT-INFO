@@ -42,8 +42,8 @@ export async function water(access_token: string, phone: string):
         student_id: string;
         phone: string;
         balance: number;
-        is_card: boolean;
         is_code: boolean;
+        is_card: boolean;
     }> {
 
     // Fill in the headers
@@ -55,9 +55,6 @@ export async function water(access_token: string, phone: string):
     // Request the card
     const res = await fetch(host, { method: 'POST', headers, body: body_str });
     let water = await res.json();
-    console.log(body_str);
-    console.log(res)
-    console.log(water)
     if (typeof water !== 'object' || !water?.map?.data)
         throw new UpstreamError(`Invalid response data of type ${typeof water}`);
     water = water.map.data;
@@ -85,7 +82,7 @@ export async function water(access_token: string, phone: string):
         student_id: water.identifier as string,
         phone: water.telPhone as string,
         balance: (water.accountMoney + water.accountGivenMoney) / 10,
-        is_card: water.isCard === 1,
         is_code: water.isUseCode === 1,
+        is_card: water.isCard === 1,
     }
 }
