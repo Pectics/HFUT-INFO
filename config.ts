@@ -11,6 +11,10 @@ export default {
             '/token',
             '/card',
             '/water/:phone\\d{11}',
+        ],
+        '/laundries': [
+            '/:id\\d+',
+            '/',
         ]
     },
     /* News API */
@@ -27,4 +31,14 @@ export default {
     ] as [number, string, string][],
     /* Synjones API */
     SYNJONES_SENSITIVE: false,
+    /* Laundry API */
+    LAUNDRY_CODES: {
+        floors: ["493fb682-9e9f-46fb-9b25-07ce0a0ce7c8"],
+        rooms: [
+            "201906141445550000054569848532",
+            "202401021844500000069996566537",
+        ],
+    },
+    LAUNDRY_UPDATE_INTERVAL: 30,
+    LAUNDRY_QIEKJ_TOKEN: '1c1f3ea17b9e6ad2f62544f0188ddb9b',
 };
