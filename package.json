@@ -1,10 +1,10 @@
 {
-  "name": "hfut-info-api",
+  "name": "hfut-info",
   "version": "0.1.0",
   "description": "合肥工业大学相关信息接口",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Pectics/HFUT-Info-API.git"
+    "url": "https://github.com/Pectics/HFUT-INFO.git"
   },
   "private": true,
   "scripts": {
