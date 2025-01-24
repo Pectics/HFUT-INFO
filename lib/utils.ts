@@ -124,7 +124,7 @@ export function header(request: Request, key: string, def?: string) {
 export function data(data: any, code: number = 200): Response {
     if (code < 200 || code >= 300)
         throw new Error(`Invalid status code: ${code}`);
-    return new Response(JSON.stringify(data, null, 4), {
+    return new Response(JSON.stringify(data), {
         status: code,
         headers: {
             'Content-Type': 'application/json',
