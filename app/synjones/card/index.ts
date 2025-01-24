@@ -33,13 +33,13 @@ const headers = {
  *          - `transfer_flag`: The auto-transfer flag.
  *          - `bank_account?`: The bank account associated with the card (if sensitive data is enabled).
  *          - `profile`: The user's profile information:
- *              - `id`: The user ID.
- *              - `username`: The user's account name.
- *              - `idcard?`: The user's ID card number (if sensitive data is enabled).
- *              - `name`: The user's name.
- *              - `sex`: The user's sex ('female' or 'male').
- *              - `department`: The user's department name.
- *              - `grade`: The user's grade or identity name.
+ *          -   - `id`: The user ID.
+ *          -   - `username`: The user's account name.
+ *          -   - `idcard?`: The user's ID card number (if sensitive data is enabled).
+ *          -   - `name`: The user's name.
+ *          -   - `sex`: The user's sex ('female' or 'male').
+ *          -   - `department`: The user's department name.
+ *          -   - `grade`: The user's grade or identity name.
  * @throws {UpstreamError} If the response data is invalid or incomplete.
  * @throws {AuthenticationError} If the access token is incorrect.
  * @throws {APIError} If there is an internal server error.
