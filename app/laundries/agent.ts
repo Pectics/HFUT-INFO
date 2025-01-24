@@ -62,7 +62,7 @@ export type Machine = {
     id: number;
     name: string;
     type: 11 | 12 | 21 | 22; // 10: WASHER, 20: DRYER, 1: CLOTHES, 2: SHOES
-    available: boolean;
+    is_available: boolean;
     time_left: string | undefined;
 };
 export type Laundry = {
@@ -133,7 +133,7 @@ function room_machines(raws: MachineRaw[]): Laundry[] {
             id: 0, // Fill this in later
             name: 'null', // Fill this in later
             type: (+_name.includes('烘') + 1) * 10 + (+_name.includes('鞋') + 1),
-            available: raw.deviceWorkStatus === 10,
+            is_available: raw.deviceWorkStatus === 10,
             time_left: raw.endUseTimeValue || undefined,
         } as Machine;
 
@@ -187,7 +187,7 @@ function floor_machines(raws: MachineRaw[]): Laundry[] {
             id: 0, // Fill this in later
             name: 'null', // Fill this in later
             type: (+_name.includes('烘') + 1) * 10 + (+_name.includes('鞋') + 1),
-            available: raw.deviceWorkStatus === 10,
+            is_available: raw.deviceWorkStatus === 10,
             time_left: raw.endUseTimeValue || undefined,
         } as Machine;
 
