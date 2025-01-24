@@ -241,45 +241,33 @@ function floor_machines(raws: MachineRaw[]): Laundry[] {
 /**
  * Updates the cache with the latest laundry machine data.
  */
-function update() {
-    const last_update = Date.now();
-    const laundries = new Map<number, Laundry>();
-    let _records = 0;
-
+export async function update() {
     // Fetch and process rooms machines
-    config.LAUNDRY_CODES.rooms.forEach(code => fetch_machines(code)
-        .then(raws => {
-            room_machines(raws)
-                .forEach(laundry => laundries.set(laundry.id, laundry));
-            if (++_records >= 2) {
-                cache.last_update = last_update;
-                cache.laundries = laundries;
-            }
-        }));
+    for (const code of config.LAUNDRY_CODES.rooms)
+        room_machines(await fetch_machines(code))
+            .forEach(laundry => cache.laundries.set(laundry.id, laundry));
 
     // Fetch and process floors machines
-    config.LAUNDRY_CODES.floors.forEach(code => fetch_machines(code)
-        .then(raws => {
-            floor_machines(raws)
-                .forEach(laundry => laundries.set(laundry.id, laundry));
-            if (++_records >= 2) {
-                cache.last_update = last_update;
-                cache.laundries = laundries;
-            }
-        }));
+    for (const code of config.LAUNDRY_CODES.floors)
+        floor_machines(await fetch_machines(code))
+            .forEach(laundry => cache.laundries.set(laundry.id, laundry));
+
+    // Update cache timestamp
+    cache.last_update = Date.now();
 }
 
 /**
  * Retrieves a list of laundries with basic information.
  *
- * @returns {Array<{id: number, type: 1 | 2, name: string}>} 
+ * @returns {Promise<{id: number, type: 1 | 2, name: string}[]>} 
  *          An array of laundry objects containing basic information:
  *          - `id`: The laundry ID.
  *          - `type`: The type of laundry (1 for ROOM, 2 for FLOOR).
  *          - `name`: The name of the laundry.
  */
-export function laundries(): Array<{ id: number; type: 1 | 2; name: string; }> {
-    if (Date.now() - cache.last_update > config.LAUNDRY_UPDATE_INTERVAL * 1000) update();
+export async function laundries(): Promise<{ id: number; type: 1 | 2; name: string; }[]> {
+    if (Date.now() - cache.last_update > config.LAUNDRY_UPDATE_INTERVAL * 1000)
+        await update();
     const laundries = [] as Omit<Laundry, 'machines'>[];
     for (const laundry of cache.laundries.values())
         laundries.push({ id: laundry.id, type: laundry.type, name: laundry.name });
@@ -303,8 +291,9 @@ export function laundries(): Array<{ id: number; type: 1 | 2; name: string; }> {
  *          -   - `time_left?`: The remaining time for the machine to be available (if applicable).
  * @throws {ParamError} If the provided ID is invalid or the laundry is not found.
  */
-export function laundry(id: number): Laundry {
-    if (Date.now() - cache.last_update > config.LAUNDRY_UPDATE_INTERVAL * 1000) update();
+export async function laundry(id: number): Promise<Laundry> {
+    if (Date.now() - cache.last_update > config.LAUNDRY_UPDATE_INTERVAL * 1000)
+        await update();
     const laundry = cache.laundries.get(id);
     if (!laundry) throw new ParamError('id', id);
     return laundry;
