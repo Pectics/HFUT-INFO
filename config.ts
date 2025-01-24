@@ -39,6 +39,6 @@ export default {
             "202401021844500000069996566537",
         ],
     },
-    LAUNDRY_UPDATE_INTERVAL: 30,
+    LAUNDRY_UPDATE_INTERVAL: 60,
     LAUNDRY_QIEKJ_TOKEN: '1c1f3ea17b9e6ad2f62544f0188ddb9b',
 };
