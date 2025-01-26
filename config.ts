@@ -1,6 +1,7 @@
 export default {
     TIMEZONE: 'Asia/Shanghai',
     DOCS_URL: 'https://docs.hfut.info',
+    PROXY_URL: 'https://proxy.peckot.com',
     HEADER_PARAM_PREFIX: 'X-HFUTINFO-',
     API: {
         '/news': [

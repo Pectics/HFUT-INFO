@@ -1,6 +1,7 @@
 // Dependencies
 import config from "@/config";
 import { ParamError, UpstreamError } from "@/lib/errors";
+import { proxy_fetch } from "@/lib/utils";
 
 // Configs
 const host = 'https://userapi.qiekj.com/appointNew/near/newMachines';
@@ -83,7 +84,7 @@ async function fetch_machines(code: string): Promise<MachineRaw[]> {
     body.shopId = code;
     const body_str = new URLSearchParams(body).toString();
     headers['Content-Length'] = body_str.length.toString();
-    const res = await fetch(host, { method: 'POST', headers, body: body_str });
+    const res = await proxy_fetch(host, { method: 'POST', headers, body: body_str });
     if (!res.ok) {
         console.error(`Failed to fetch machines of laundry(${code}): ${res.status} ${res.statusText}`);
         console.error(await res.text());
